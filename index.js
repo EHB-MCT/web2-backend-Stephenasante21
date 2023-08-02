@@ -85,7 +85,7 @@ app.post("/register", async (req,res) => {
 
         if (existingUser) {
             res.status(409).send({
-                status: "ERROR",
+                status: "Authentication error",
                 message: "User with this email already exists."
             })
             return
@@ -104,7 +104,7 @@ app.post("/register", async (req,res) => {
 
         // Send back a success response when the user is saved
         res.status(201).send({
-        status: "OK SUCCES",
+        status: "Authentication succesfull!!",
         message: "User has been created",
         data: insertedUser
         })
@@ -160,28 +160,36 @@ app.post("/login", async (req,res) => {
             //compare passwords
             if(findUser.password == loginuser.password){
                 res.status(200).send({
-                    status: "OK SUCCES",
-                    message: "YOU ARE LOGGGED IN"
+                    status: "Authentication succesfull!!",
+                    message: "You are logged in!!",
+                    data: {
+                        username: findUser.username,
+                        email: findUser.email,
+                        uuid: findUser.uuid,
+                    }
                 })
+                return
             }else {
                 //password is incorrect
                 res.status(401).send({
-                    status: "ERROR",
+                    status: "Authentication error",
                     message: "Password is incorrect!!!!"
                 })
+                return
             }
         }else{
             //no user found send back error
             res.status(401).send({
-                status: "ERROR",
+                status: "Authentication error",
                 message: "no user with this email has been found!!!! Register first"
             })
+            return
         }
 
     }catch(error){
         console.log(error)
         res.status(500).send({
-            error: 'Something went wrong',
+            error: 'Authentication error',
             value: error
         })
     }finally{
@@ -190,6 +198,7 @@ app.post("/login", async (req,res) => {
 
 })
 
+//VERIFYID
 app.post("/veryfyID", async (req,res) => {
 
     //Check for empty and faulty ID fields
@@ -226,7 +235,7 @@ app.post("/veryfyID", async (req,res) => {
                 data: {
                     username: user.username,
                     email: user.email,
-                    uuid: user.uuid
+                    uuid: user.uuid,
                 }
             })
         }else{
@@ -242,6 +251,36 @@ app.post("/veryfyID", async (req,res) => {
         res.status(500).send({
             error: 'Something went wrong',
             value: error
+        })
+    }finally{
+        await client.close();
+    }
+
+})
+
+//IMG
+app.get("/img", async (req, res) => {
+    try{
+        //connect to the db
+        await client.connect();
+
+        const image = {
+            img: req.body.img_url,
+            title: req.body.title,
+            artist: req.body.artist,
+            description: req.body.description,
+        }
+     
+        //retrieve collection data
+        const coll = client.db('Web2courseproject').collection('images');
+
+        const getAllImages = await coll.find({}).toArray();
+
+        res.status(200).json(getAllImages);
+    }catch(error){
+        console.log(error)
+        res.status(500).send({
+            error: 'Something went wrong'
         })
     }finally{
         await client.close();
