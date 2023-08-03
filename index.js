@@ -119,6 +119,84 @@ app.post("/register", async (req,res) => {
 
 })
 
+//UPDATE USER
+app.put("/update/:userId", async (req,res) => {
+    //check for empty fields 
+    //username
+    if(!req.body.username){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: username"
+        })
+        return
+    }
+
+    //password
+    if(!req.body.password){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: password"
+        })
+        return
+    }
+
+    //description
+    /*if(!req.body.description){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: description"
+        })
+    }*/
+
+    // Extract the userId from the URL parameter
+    const userId = uuidv4();
+
+    try{
+        // Connect to the database
+        await client.connect();
+
+        // Retrieve collection data
+        const coll = client.db('Web2courseproject').collection('users')
+        
+        // Check if a user with the given email already exists
+        const query = {uuid: userId}
+        const existingUser = await coll.findOne(query)
+        
+        if (!existingUser) {
+            res.status(404).send({
+                status: "Not Found",
+                message: "User not found."
+            });
+            return;
+        }
+
+        // Create a new user object
+        const updatedUser = {
+            username: req.body.username,
+            password: req.body.password,
+        }
+
+        // Update the user in the database
+        await coll.updateOne({ uuid: userId }, { $set: updatedUser });
+
+        res.status(200).send({
+            status: "Success",
+            message: "User updated successfully.",
+            data: updatedUser
+        });
+
+    
+    }catch(error){
+        console.log(error)
+        res.status(500).send({
+            error: 'Something went wrong: ${error}',
+            value: error
+        })
+    }finally{
+        await client.close();
+    }
+})
+
 //LOGIN
 app.post("/login", async (req,res) => {
 
@@ -258,19 +336,12 @@ app.post("/veryfyID", async (req,res) => {
 
 })
 
-//IMG
-app.get("/img", async (req, res) => {
+//ARTPIECES
+app.get("/artpieces", async (req, res) => {
     try{
         //connect to the db
         await client.connect();
 
-        const image = {
-            img: req.body.img_url,
-            title: req.body.title,
-            artist: req.body.artist,
-            description: req.body.description,
-        }
-     
         //retrieve collection data
         const coll = client.db('Web2courseproject').collection('images');
 
@@ -285,8 +356,41 @@ app.get("/img", async (req, res) => {
     }finally{
         await client.close();
     }
-
 })
+
+// /GET 1 ARTPIECE 
+app.get("/artpiece", async (req, res) => {
+    try{
+        //connect to the db
+        await client.connect();
+
+        //retrieve collection data
+        const coll = client.db('Web2courseproject').collection('images');
+
+        const image = {img_url: req.query.img_url};
+
+        //find the image based on the image url
+        const artpiece = await coll.findOne(image);
+
+        if (image) {
+            res.status(200).json(artpiece);
+        }else{
+            res.status(400).json({
+            status: "error",
+            message: 'Image:' + req.query.id + 'not found'})
+        }
+    }catch(error){
+        console.log(error)
+        res.status(500).send({
+            error: 'Something went wrong'
+        })
+    }finally{
+        await client.close();
+    }
+})    
+
+//SAVE AN ARTPIECE
+
 
 app.listen(3000);
 console.log("app running at http://localhost:3000");
