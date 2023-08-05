@@ -119,84 +119,6 @@ app.post("/register", async (req,res) => {
 
 })
 
-//UPDATE USER
-app.put("/update/:userId", async (req,res) => {
-    //check for empty fields 
-    //username
-    if(!req.body.username){
-        res.status(401).send({
-            status: "bad Request",
-            message: "some field is missing: username"
-        })
-        return
-    }
-
-    //password
-    if(!req.body.password){
-        res.status(401).send({
-            status: "bad Request",
-            message: "some field is missing: password"
-        })
-        return
-    }
-
-    //description
-    /*if(!req.body.description){
-        res.status(401).send({
-            status: "bad Request",
-            message: "some field is missing: description"
-        })
-    }*/
-
-    // Extract the userId from the URL parameter
-    const userId = uuidv4();
-
-    try{
-        // Connect to the database
-        await client.connect();
-
-        // Retrieve collection data
-        const coll = client.db('Web2courseproject').collection('users')
-        
-        // Check if a user with the given email already exists
-        const query = {uuid: userId}
-        const existingUser = await coll.findOne(query)
-        
-        if (!existingUser) {
-            res.status(404).send({
-                status: "Not Found",
-                message: "User not found."
-            });
-            return;
-        }
-
-        // Create a new user object
-        const updatedUser = {
-            username: req.body.username,
-            password: req.body.password,
-        }
-
-        // Update the user in the database
-        await coll.updateOne({ uuid: userId }, { $set: updatedUser });
-
-        res.status(200).send({
-            status: "Success",
-            message: "User updated successfully.",
-            data: updatedUser
-        });
-
-    
-    }catch(error){
-        console.log(error)
-        res.status(500).send({
-            error: 'Something went wrong: ${error}',
-            value: error
-        })
-    }finally{
-        await client.close();
-    }
-})
-
 //LOGIN
 app.post("/login", async (req,res) => {
 
@@ -274,6 +196,115 @@ app.post("/login", async (req,res) => {
         await client.close();
     }
 
+})
+
+//UPDATE USER
+app.put("/update/:userId", async (req,res) => {
+    //check for empty fields 
+    //username
+    if(!req.body.username){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: username"
+        })
+        return
+    }
+
+    //password
+    if(!req.body.password){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: password"
+        })
+        return
+    }
+
+    //description
+    /*if(!req.body.description){
+        res.status(401).send({
+            status: "bad Request",
+            message: "some field is missing: description"
+        })
+    }*/
+
+    // get the userId
+    const userId = req.params.userId;
+
+    try{
+        // Connect to the database
+        await client.connect();
+
+        // Retrieve collection data
+        const coll = client.db('Web2courseproject').collection('users')
+        
+        // Check if a user with the given email already exists
+        const query = {uuid: userId}
+        const existingUser = await coll.findOne(query)
+        
+        if (!existingUser) {
+            res.status(404).send({
+                status: "Not Found",
+                message: "User not found."
+            });
+            return;
+        }
+
+        // Create a new user object
+        const updatedUser = {
+            username: req.body.username,
+            password: req.body.password,
+        }
+
+        // Update the user in the database
+        await coll.updateOne({ uuid: userId }, { $set: updatedUser });
+
+        res.status(200).send({
+            status: "Success",
+            message: "User updated successfully.",
+            data: updatedUser
+        });
+
+    
+    }catch(error){
+        console.log(error)
+        res.status(500).send({
+            error: 'Something went wrong: ${error}',
+            value: error
+        })
+    }finally{
+        await client.close();
+    }
+})
+
+//DELETE USER
+app.delete("/delete/:userId", async (req, res) => {
+    //get the userid
+    const userId = req.params.userId;
+
+    try{
+        // Connect to the database
+        await client.connect();
+
+        // Retrieve collection data
+        const coll = client.db('Web2courseproject').collection('users')
+        
+        // Check if a user with the given email already exists
+        const query = {uuid: userId}
+        const existingUser = await coll.findOne(query)
+        
+        if (!existingUser) {
+            res.status(404).send({
+                status: "Not Found",
+                message: "User not found."
+            });
+            return;
+        }   
+        
+        //delete the user from the database
+        
+    } catch(error){
+
+    }
 })
 
 //VERIFYID
