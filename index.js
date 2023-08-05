@@ -65,14 +65,6 @@ app.post("/register", async (req,res) => {
         return
     }
 
-    //description
-    /*if(!req.body.description){
-        res.status(401).send({
-            status: "bad Request",
-            message: "some field is missing: description"
-        })
-    }*/
-
     try{
         // Connect to the database
         await client.connect();
@@ -270,37 +262,36 @@ app.put("/update/:userId", async (req,res) => {
 
 //DELETE USER
 app.delete("/delete/:userId", async (req, res) => {
-    //get the userid
     const userId = req.params.userId;
 
-    try{
+    try {
         // Connect to the database
         await client.connect();
 
         // Retrieve collection data
-        const coll = client.db('Web2courseproject').collection('users')
-        
-        // Check if a user with the given email already exists
-        const query = {uuid: userId}
-        const existingUser = await coll.findOne(query)
-        
+        const coll = client.db('Web2courseproject').collection('users');
+
+        // Check if a user with the given UUID exists
+        const query = { uuid: userId };
+        const existingUser = await coll.findOne(query);
+
         if (!existingUser) {
             res.status(404).send({
                 status: "Not Found",
                 message: "User not found."
             });
             return;
-        }   
-        
-        //delete the user from the database
+        }
+
+        // Delete the user from the database
         await coll.deleteOne(query);
 
         res.status(200).send({
-            status: "Succes",
-            message: "User deleted succesfully."
+            status: "Success",
+            message: "User deleted successfully."
         });
 
-    } catch(error){
+    } catch (error) {
         console.log(error);
         res.status(500).send({
             error: 'Something went wrong',
@@ -309,7 +300,7 @@ app.delete("/delete/:userId", async (req, res) => {
     } finally {
         await client.close();
     }
-})
+});
 
 //VERIFYID
 app.post("/veryfyID", async (req,res) => {
@@ -386,7 +377,7 @@ app.get("/artpieces", async (req, res) => {
     }catch(error){
         console.log(error)
         res.status(500).send({
-            error: 'Something went wrong'
+            error: error
         })
     }finally{
         await client.close();
@@ -425,7 +416,27 @@ app.get("/artpiece", async (req, res) => {
 })    
 
 //SAVE AN ARTPIECE
+app.post("/saveartpiece/:userId", async (req, res) => {
+    //get the userId
+    const userId = req.params.userId;
 
+    try{
+        // Connect to the database
+        await client.connect();
+
+        // Retrieve collection data
+        const coll = client.db('Web2courseproject').collection('savedart');        
+
+
+        const savedart = {
+
+        }
+    }catch(error){
+
+    }finally{
+        await client.close();
+    }
+})
 
 app.listen(3000);
 console.log("app running at http://localhost:3000");
