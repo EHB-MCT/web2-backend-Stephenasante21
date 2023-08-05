@@ -219,14 +219,6 @@ app.put("/update/:userId", async (req,res) => {
         return
     }
 
-    //description
-    /*if(!req.body.description){
-        res.status(401).send({
-            status: "bad Request",
-            message: "some field is missing: description"
-        })
-    }*/
-
     // get the userId
     const userId = req.params.userId;
 
@@ -301,9 +293,21 @@ app.delete("/delete/:userId", async (req, res) => {
         }   
         
         //delete the user from the database
-        
-    } catch(error){
+        await coll.deleteOne(query);
 
+        res.status(200).send({
+            status: "Succes",
+            message: "User deleted succesfully."
+        });
+
+    } catch(error){
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            value: error
+        });
+    } finally {
+        await client.close();
     }
 })
 
