@@ -427,12 +427,53 @@ app.post("/saveartpiece/:userId", async (req, res) => {
         // Retrieve collection data
         const coll = client.db('Web2courseproject').collection('savedart');        
 
-
+        
         const savedart = {
-
+            img_url: req.body.img_url,
+            artist: req.body.artist,
+            title: req.body.title,
+            uuid: userId
         }
-    }catch(error){
 
+        //insert in the database 
+        const result = await coll.insertOne(savedart);
+        res.status(201).send({
+            status: "Succes",
+            message: "Art piece saved succesfully.",
+            data: savedart
+        })
+    }catch(error){
+        console.log(error);
+        res.status(500).send({
+            error: 'Something went wrong',
+            message: error
+        });        
+    }finally{
+        await client.close();
+    }
+})
+
+//DISPLAY THE SAVED ART
+app.get("/savedartpieces/:userId", async (req, res) => {
+    //get the userid
+    const userId = req.params.userId;
+
+    try{
+        //connect to the database
+        await client.connect();
+
+        //retrieve collection data
+        const coll = client.db('Web2courseproject').collection('savedart');    
+
+        //find saved art pieces for the user
+        const savedArtPieces = await coll.find({ uuid: userId }).toArray();
+
+        res.status(200).json(savedArtPieces);
+    } catch(error){
+        res.status(500).send({
+            error: 'Something went wrong',
+            message: error
+        });
     }finally{
         await client.close();
     }
