@@ -479,5 +479,53 @@ app.get("/savedartpieces/:userId", async (req, res) => {
     }
 })
 
+//DELETE AN ARTPIECE 
+app.delete("/deleteartpiece/:userId", async (req, res) => {
+    //get the userid
+    const userId = req.params.userId;  
+    try{
+        //connect to the database
+        await client.connect();
+
+        //retrieve collection data
+        const coll = client.db('Web2courseproject').collection('savedart');     
+        
+        //check if the artpiece exist 
+        const imgurl = req.body.img_url;
+
+        const existingArtpiece = await coll.findOne({img_url: imgurl});
+
+        if(!existingArtpiece) {
+            res.status(200).send ({
+                status: "art piece not found",
+                message: "this art piece is not saved by the user"
+            })
+        }
+
+        //delete the artpiece
+        const result = await coll.deleteOne({img_url: imgurl})
+
+        if(result){
+            res.status(200).send({
+                status: "Succes",
+                message: "art piece successfully deleted."
+            })
+        } else{
+            res.status(500).send({
+                status: "Error",
+                message: "An error occurred while deleting an art piece"
+            })
+        }
+    } catch(error){
+        res.status(500).send({
+            error: 'Something went wrong',
+            message: error
+        });
+    }finally{
+        await client.close();
+    }
+})
+
 app.listen(3000);
 console.log("app running at http://localhost:3000");
+
