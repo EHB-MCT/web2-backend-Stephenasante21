@@ -8,11 +8,13 @@ require('dotenv').config()
 //mongoclient
 const client = new MongoClient(process.env.FINAL_URL)
 
+const port = process.env.port || 7999;
+
 app.use(express.urlencoded({extended:false}));
 app.use(cors())
 app.use(express.json())
 
-app.get("/testMongo", async (req,res) => {
+/*app.get("/testMongo", async (req,res) => {
     try{
         //connect to the db
         await client.connect();
@@ -32,7 +34,7 @@ app.get("/testMongo", async (req,res) => {
         await client.close();
     }
 
-})
+})*/
 
 //REGISTER
 app.post("/register", async (req,res) => {
