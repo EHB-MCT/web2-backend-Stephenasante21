@@ -1,5 +1,8 @@
 {
   "name": "web2-backend-stephenasante21",
+  "engines": {
+    "node": ">=14.17.0"
+  },
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
